@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, computed } from 'vue';
 import { useAppearance } from '@/composables/useAppearance';
-import { Sun, Moon, Laptop2 } from 'lucide-vue-next';
+import { Sun, Moon, SpellCheck } from 'lucide-vue-next';
 import { Toaster } from 'vue-sonner';
 import 'vue-sonner/style.css'; // vue-sonner v2 requires this import
 import { toast } from "vue-sonner";
@@ -88,10 +88,8 @@ onUnmounted(() => clearInterval(interval));
 
 // Produk list (radio tiles)
 const products = ref([
-  { id: 1, name: 'Habbamax Garlic 200 (Dus)', price: 1750000, image: '/images/200dus.png', qty: 0 },
-  { id: 2, name: 'Habbamax Garlic 100 (Dus)', price: 910000, image: '/images/100dus.png', qty: 0 },
-  { id: 3, name: 'Habbamax Garlic 200 (Botol)', price: 150000, image: '/images/200botol.png', qty: 0 },
-  { id: 4, name: 'Habbamax Garlic 100 (Botol)', price: 80000, image: '/images/100botol.png', qty: 0 },
+  { id: 1, name: 'Habbamax Garlic 200 (Botol)', price: 200000, image: '/Foto_Produk_001.png', qty: 0 },
+  { id: 2, name: 'Habbamax Garlic 100 (Botol)', price: 150000, image: '/Foto_Produk_001.png', qty: 0 },
 ]);
 
 function increment(p) {
@@ -113,9 +111,9 @@ const alamat = ref("");
 // SELLER LIST
 const sellerSearch = ref("");
 const sellers = [
-  { id: 1, name: "Rizal", city: "Bandung", phone: "6285950540055", avatar: "/images/s1.png" },
-  { id: 2, name: "Sinta", city: "Jakarta", phone: "6285950540055", avatar: "/images/s2.png" },
-  { id: 3, name: "Budi", city: "Surabaya", phone: "6285950540055", avatar: "/images/s3.png" },
+  { id: 1, name: "Agus", city: "Semarang", phone: "6281228008464", avatar: "/avatar.png" },
+  { id: 2, name: "Baruno", city: "Jakarta", phone: "6282134780459", avatar: "/avatar.png" },
+  { id: 3, name: "Yuda", city: "Bali", phone: "6285950540055", avatar: "/avatar.png" },
 ];
 
 const selectedSeller = ref(null);
@@ -211,7 +209,7 @@ function submitOrder() {
                    dark:bg-black dark:text-yellow-300">
       <Sun v-if="appearance === 'light'" class="size-4" />
       <Moon v-else-if="appearance === 'dark'" class="size-4" />
-      <Laptop2 v-else class="size-4" />
+      <SpellCheck v-else class="size-4" />
     </button>
   </header>
 
@@ -302,47 +300,70 @@ function submitOrder() {
   <h3 class="text-2xl font-bold mb-6 text-center">Form Order</h3>
 
 <!-- LIST PRODUK DENGAN QTY -->
-<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
-  <div
-    v-for="p in products"
-    :key="p.id"
-    class="cursor-pointer border rounded-xl p-4 flex flex-col items-center relative
-           bg-white dark:bg-gray-900 shadow transition-all"
-  >
+<div class="grid grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+<div
+  v-for="p in products"
+  :key="p.id"
+  class="cursor-pointer border rounded-xl overflow-hidden
+         flex flex-col relative
+         bg-white dark:bg-gray-900 shadow transition-all"
+>
 
-    <img :src="p.image" class="w-24 h-24 object-contain mb-3" />
+  <!-- IMAGE FULL -->
+  <img 
+    :src="p.image" 
+    class="w-full h-40 object-cover rounded-t-xl"
+  />
 
-    <p class="text-center font-semibold">{{ p.name }}</p>
-    <p class="text-green-700 dark:text-green-300 mt-1">
+  <!-- CONTENT -->
+  <div class="p-4 grid grid-cols-1 items-center mb-8">
+    <p class="font-semibold text-sm">{{ p.name }}</p>
+
+    <p class="text-green-700 dark:text-green-300 mt-1 flex justify-left">
       Rp {{ p.price.toLocaleString() }}
     </p>
+  </div>
 
-    <!-- INCREMENT DECREMENT -->
-    <div class="flex items-center gap-3 mt-4">
-      <button
-        @click="decrement(p)"
-        class="w-8 h-8 flex items-center justify-center bg-red-500 text-white rounded-md"
-      >−</button>
+  <!-- MINI COUNTER TIKTOK STYLE -->
+  <div class="
+      absolute bottom-3 right-1/2 transform translate-x-1/2
+    flex items-center bg-white dark:bg-gray-800 
+    shadow-lg rounded-full overflow-hidden border
+      ">
 
-      <input
-        type="number"
-        min="0"
-        v-model.number="p.qty"
-        class="w-14 text-center px-2 py-1 border rounded-md bg-white dark:bg-gray-800
-                 appearance-none 
-         [&::-webkit-outer-spin-button]:appearance-none 
-         [&::-webkit-inner-spin-button]:appearance-none 
-         [-moz-appearance:textfield]
-        "
-      />
+    <!-- minus -->
+    <button
+      @click="decrement(p)"
+      class="w-8 h-8 flex items-center justify-center text-red-500 font-bold hover:bg-red-50 dark:hover:bg-gray-700"
+    >
+      −
+    </button>
 
-      <button
-        @click="increment(p)"
-        class="w-8 h-8 flex items-center justify-center bg-green-500 text-white rounded-md"
-      >+</button>
-    </div>
+    <!-- input -->
+    <input
+      type="number"
+      min="0"
+      v-model.number="p.qty"
+      class="w-10 h-8 text-center text-sm border-x bg-transparent
+             focus:outline-none
+             appearance-none 
+             [&::-webkit-outer-spin-button]:appearance-none 
+             [&::-webkit-inner-spin-button]:appearance-none 
+             [-moz-appearance:textfield]"
+    />
+
+    <!-- plus -->
+    <button
+      @click="increment(p)"
+      class="w-8 h-8 flex items-center justify-center text-green-500 font-bold hover:bg-green-50 dark:hover:bg-gray-700"
+    >
+      +
+    </button>
 
   </div>
+
+</div>
+
 </div>
 
 
