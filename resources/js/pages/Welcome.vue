@@ -16,18 +16,20 @@ function toggleAppearance() {
 
 // TESTIMONIAL DATA
 const testimonials = [
-  { text: 'Badan terasa lebih segar setiap pagi.', author: 'Andi' },
-  { text: 'Pencernaan jauh lebih lancar.', author: 'Sinta' },
-  { text: 'Tekanan darah lebih stabil.', author: 'Budi' },
-  { text: 'Cocok untuk multivitamin harian.', author: 'Rina' },
-  { text: 'Membantu mengurangi rasa mudah lelah.', author: 'Dewi' },
-  { text: 'Tidur lebih nyenyak setelah rutin minum.', author: 'Agus' },
-  { text: 'Nafsu makan lebih stabil.', author: 'Herlina' },
-  { text: 'Nyeri sendi berkurang perlahan.', author: 'Putra' },
-  { text: 'Tidak gampang sakit lagi.', author: 'Joko' },
-  { text: 'Kualitas hidup terasa meningkat.', author: 'Mila' },
-  { text: 'Tubuh terasa lebih ringan dan bertenaga.', author: 'Syahrul' },
-  { text: 'Sangat membantu aktivitas harian saya.', author: 'Lestari' }
+  { text: 'Alhamdulillah. Setelah rutin minum Habbamax badan saya lebih bugar dan tidak gampang capek. Bangun tidur fresh walaupun setelah aktifitas berat. Keluhan perut sebah atau maag alhamdulillah tidak kambuh lagi. Kami sekeluarga rutin minum Habbamax sebagai suplemen harian.', author: 'Pulung - Guru di Limpung', avatar: '/avatars/pulung.png'  },
+  { text: 'Kondisi awal sedang tidak sehat karena gula darah sangat tinggi dan mengalami luka yg terus basah dan malam hari kencing sampai 5 kali. Alhamdulillah hari ke 20 minum Habbamax, kondisi fisik lebih sehat dan bugar, kulit lebih segar dan kencing malam hanya 1 kali.', author: 'Sam\'ani - Petani di Temanggung', avatar: '/avatars/samani.png' },
+  { text: 'Saya mengalami Wasir atau Ambeien kronis sampai mengalami pendarahan saat BAB. Saya sudah operasi 3 kali, tetap mengalami BAB berdarah. Alhamdulillah 3 hari konsumsi HABBAMAX 4IN1, BAB lancar dan tidak berdarah lagi.', author: 'Anas - Pedagang di Kendal', avatar: '/avatars/anas.png' },
+  { text: 'Saya sering mengalami sakit di lutut, sering kesemutan dan setiap malam mengalami insomnia. Alhamdulillah, HABBAMAX menjadi wasilah kesehtan dan kebugaran tubuh saya. Semua keluhan mereda dan sembuh. NAIKKAN LEVEL SEHATMU!', author: 'Tuharli - Petani Lereng G. Prau', avatar: '/avatars/tuharli.png' },
+  { text: 'Saya sering mendadak pusing jika kelelahan, termasuk di saat bangun tidur. Namun dengan Habbamax ini, saya rasakan manfaat yang luar biasa. Pagi bangun segar bugar untuk kegiatan produktif namun malam tidur jadi lebih pulas.', author: 'Bagus - Dokter di Temanggung', avatar: '/avatars/bagus.png' },
+  { text: 'Keluhan saya pasca terapi jantung koroner, nyeri dada kiri maupun tengah, kini sudah jarang, lantas kaku di leher dan bawah leher, juga sudah mereda, alhamdulillah nyaman setelah minum HABBAMAX.', author: 'Ari - Pedagang di Pati', avatar: '/avatars/ari.png' },
+];
+
+const videos = [
+  { src: '/storage/videos/001 Ari Setiawan.mp4', author: 'Ari Setyawan', caption: 'Sakit Jantung' },
+  { src: '/storage/videos/002 Eko Sumarno.mp4', author: 'Eko Sumarno', caption: 'Asam Urat' },
+  { src: '/storage/videos/004 Abid.mp4', author: 'Abid', caption: 'Pegal Pegal' },
+  { src: '/storage/videos/Testimoni Habbamax 012 Anas.mp4', author: 'Abid', caption: 'Hemoroid' },
+  { src: '/storage/videos/Testimoni Habbamax 017 Bagus Pratomo.mp4', author: 'Bagus Pratomo', caption: 'Pusing Mendadak' },
 ];
 
 const ingredients = [
@@ -63,56 +65,79 @@ const steps = [
 // CAROUSEL LOGIC
 const carouselTrack = ref<HTMLElement | null>(null);
 const currentIndex = ref(0);
-let interval: any = null;
+let interval: ReturnType<typeof setInterval> | null = null;
 
-function updatePosition() {
+function scrollToIndex(index: number) {
   if (!carouselTrack.value) return;
-  const card = carouselTrack.value.children[0] as HTMLElement;
+  const track = carouselTrack.value;
+  const card = track.children[index] as HTMLElement;
   if (!card) return;
-  const cardWidth = card.offsetWidth + 16;
-  carouselTrack.value.scrollLeft = currentIndex.value * cardWidth;
+
+  // Hitung posisi scrollLeft agar card tepat di tengah track
+  const trackCenter = track.offsetWidth / 2;
+  const cardCenter = card.offsetLeft + card.offsetWidth / 2;
+  track.scrollTo({
+    left: cardCenter - trackCenter,
+    behavior: 'smooth',
+  });
 }
 
 function nextSlide() {
   currentIndex.value = (currentIndex.value + 1) % testimonials.length;
-  updatePosition();
+  scrollToIndex(currentIndex.value);
 }
 
-function autoplay() {
-  interval = setInterval(() => {
-    nextSlide();
-  }, 3000);
+function startAutoplay() {
+  stopAutoplay();
+  interval = setInterval(nextSlide, 3000);
+}
+
+function stopAutoplay() {
+  if (interval) clearInterval(interval);
+  interval = null;
 }
 
 // DRAGGING
 let isDragging = false;
 let startX = 0;
-let scrollLeft = 0;
+let scrollLeftStart = 0;
 
-function startDrag(e: any) {
+function startDrag(e: MouseEvent | TouchEvent) {
   isDragging = true;
-  startX = e.pageX || e.touches[0].pageX;
-  scrollLeft = carouselTrack.value?.scrollLeft || 0;
-  clearInterval(interval);
+  startX = 'touches' in e ? e.touches[0].pageX : e.pageX;
+  scrollLeftStart = carouselTrack.value?.scrollLeft ?? 0;
+  stopAutoplay(); // tetap stop saat drag dimulai (cover kasus touch)
 }
 
-function onDrag(e: any) {
+function onDrag(e: MouseEvent | TouchEvent) {
   if (!isDragging || !carouselTrack.value) return;
-  const x = e.pageX || e.touches[0].pageX;
-  const walk = (x - startX) * 1.2;
-  carouselTrack.value.scrollLeft = scrollLeft - walk;
+  const x = 'touches' in e ? e.touches[0].pageX : e.pageX;
+  carouselTrack.value.scrollLeft = scrollLeftStart - (x - startX) * 1.2;
 }
 
 function endDrag() {
+  if (!isDragging) return;
   isDragging = false;
-  autoplay();
+  if (carouselTrack.value) {
+    const cards = carouselTrack.value.children;
+    const trackRect = carouselTrack.value.getBoundingClientRect();
+    let closest = 0;
+    let minDist = Infinity;
+    Array.from(cards).forEach((card, i) => {
+      const rect = (card as HTMLElement).getBoundingClientRect();
+      const dist = Math.abs(rect.left + rect.width / 2 - (trackRect.left + trackRect.width / 2));
+      if (dist < minDist) { minDist = dist; closest = i; }
+    });
+    currentIndex.value = closest;
+    scrollToIndex(closest);
+  }
+  // Hanya restart autoplay pada touch (di desktop, mouseleave yang handle)
+  const isTouch = window.matchMedia('(hover: none)').matches;
+  if (isTouch) startAutoplay();
 }
 
-onMounted(() => {
-  autoplay();
-});
-
-onUnmounted(() => clearInterval(interval));
+onMounted(() => startAutoplay());
+onUnmounted(() => stopAutoplay());
 
 // ===== FORM ORDER =====
 
@@ -358,7 +383,7 @@ function submitOrder() {
     <section class="py-20 bg-[#FAF6EF] dark:bg-[#1A1208]">
       <div class="text-center px-6 mb-10">
         <p class="text-[11px] font-medium tracking-[0.16em] uppercase
-                   text-[#7A5A10] dark:text-[#C8952A] mb-2">
+                  text-[#7A5A10] dark:text-[#C8952A] mb-2">
           Dari Pelanggan Kami
         </p>
         <h3 class="text-[32px] font-bold text-[#3D2C1E] dark:text-[#F5E6C8]"
@@ -369,34 +394,51 @@ function submitOrder() {
           Dipercaya ribuan pelanggan di seluruh Indonesia
         </p>
       </div>
- 
+
       <!-- Carousel track -->
-      <div class="flex gap-4 overflow-x-auto scroll-smooth snap-x snap-mandatory pb-4 px-6
-                  [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
-           ref="carouselTrack"
-           @mousedown="startDrag" @mousemove="onDrag" @mouseup="endDrag" @mouseleave="endDrag"
-           @touchstart="startDrag" @touchmove="onDrag" @touchend="endDrag">
- 
-        <div v-for="(t, i) in testimonials" :key="i"
-             class="min-w-[280px] max-w-[300px] flex-shrink-0 snap-start
-                    bg-white dark:bg-[#2A1E10]
-                    border border-[#E8DCCC] dark:border-[#4A3520]
-                    rounded-xl p-6
-                    hover:-translate-y-1 hover:shadow-lg hover:shadow-[#3D2C1E]/10
-                    transition-all duration-200">
- 
-          <!-- Big decorative quote mark -->
+      <div
+        ref="carouselTrack"
+        class="flex gap-4 overflow-x-auto scroll-smooth snap-x snap-mandatory pb-4
+              [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
+        style="padding-left: calc(50% - 140px); padding-right: calc(50% - 140px);"
+        @mouseenter="stopAutoplay"
+        @mouseleave="startAutoplay"
+        @mousedown="startDrag"
+        @mousemove="onDrag"
+        @mouseup="endDrag"
+        @touchstart.passive="startDrag"
+        @touchmove.passive="onDrag"
+        @touchend="endDrag"
+      >
+        <div
+          v-for="(t, i) in testimonials"
+          :key="i"
+          class="min-w-[280px] w-[280px] flex-shrink-0 snap-center
+                bg-white dark:bg-[#2A1E10]
+                border border-[#E8DCCC] dark:border-[#4A3520]
+                rounded-xl p-6
+                transition-all duration-200"
+        >
           <div class="text-[42px] leading-none text-[#F5E6C8] dark:text-[#4A3520] mb-1 select-none"
-               style="font-family: 'Playfair Display', Georgia, serif;">"</div>
- 
+              style="font-family: 'Playfair Display', Georgia, serif;">"</div>
+
           <p class="text-[14px] text-[#7A6A55] dark:text-[#B09880] leading-[1.7] italic">
             {{ t.text }}
           </p>
- 
+
           <div class="flex items-center gap-2.5 mt-4">
-            <div class="w-8 h-8 rounded-full bg-[#F5E6C8] dark:bg-[#4A3520]
-                        flex items-center justify-center
-                        text-[13px] font-semibold text-[#7A5A10] dark:text-[#C8952A]">
+            <img
+              v-if="t.avatar"
+              :src="t.avatar"
+              :alt="t.author"
+              class="w-8 h-8 rounded-full object-cover"
+            />
+            <div
+              v-else
+              class="w-8 h-8 rounded-full bg-[#F5E6C8] dark:bg-[#4A3520]
+                    flex items-center justify-center
+                    text-[13px] font-semibold text-[#7A5A10] dark:text-[#C8952A]"
+            >
               {{ t.author[0] }}
             </div>
             <span class="text-[13px] font-medium text-[#3D2C1E] dark:text-[#F5E6C8]">
@@ -405,7 +447,44 @@ function submitOrder() {
           </div>
         </div>
       </div>
-    </section>
+
+      <!-- Video Testimoni -->
+      <div class="mt-12 px-6 text-center">
+        <p class="text-[12px] font-medium tracking-[0.16em] uppercase
+                  text-[#7A5A10] dark:text-[#C8952A] mb-6">
+          Video Testimoni
+        </p>
+      </div>
+
+      <div class="flex gap-4 overflow-x-auto pb-4
+                  snap-x snap-mandatory
+                  [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
+          style="padding-left: calc(50% - 100px); padding-right: calc(50% - 100px);">
+
+        <div v-for="(v, i) in videos" :key="i"
+            class="min-w-[200px] w-[200px] flex-shrink-0 snap-center">
+
+          <div class="rounded-2xl overflow-hidden border border-[#E8DCCC] dark:border-[#4A3520]
+                      bg-black aspect-[9/16]">
+            <video
+              :src="v.src"
+              class="w-full h-full object-cover"
+              controls
+              playsinline
+              preload="metadata"
+              controlsList="nodownload"
+            />
+          </div>
+
+          <div class="mt-3 text-center">
+            <div class="flex items-center justify-center gap-2">
+              <span class="text-[13px] font-medium text-[#3D2C1E] dark:text-[#F5E6C8]">{{ v.author }}</span>
+            </div>
+            <p class="text-[12px] text-[#7A6A55] dark:text-[#9A8A6A] mt-1 italic">{{ v.caption }}</p>
+          </div>
+        </div>
+      </div>      
+    </section>    
  
     <!-- ── CARA PEMESANAN ─────────────────────────────── -->
     <section class="bg-[#3D2C1E] dark:bg-[#0F0A05] py-20 px-6">

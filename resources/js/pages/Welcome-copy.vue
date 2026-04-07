@@ -16,7 +16,7 @@ function toggleAppearance() {
 
 // TESTIMONIAL DATA
 const testimonials = [
-  { text: 'Badan terasa lebih segar setiap pagi.', author: 'Andi' },
+  { text: 'Alhamdulillah. Setelah rutin minum Habbamax badan saya lebih bugar dan tidak gampang capek. Bangun tidur fresh walaupun setelah aktifitas berat. Keluhan perut sebah atau maag alhamdulillah tidak kambuh lagi. Kami sekeluarga rutin minum Habbamax sebagai suplemen harian.', author: 'Pak Pulung' },
   { text: 'Pencernaan jauh lebih lancar.', author: 'Sinta' },
   { text: 'Tekanan darah lebih stabil.', author: 'Budi' },
   { text: 'Cocok untuk multivitamin harian.', author: 'Rina' },
